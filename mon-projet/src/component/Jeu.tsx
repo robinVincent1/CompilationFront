@@ -1,5 +1,5 @@
-import { randomInt } from "crypto";
-import React, { useState } from "react";
+import { randomInt } from 'crypto';
+import React, { useState,useEffect } from 'react';
 
 export const Jeu = () => {
   const [Cards, setCards] = useState<string[]>([
@@ -58,10 +58,14 @@ export const Jeu = () => {
   ]);
   const [dealerCards, setDealerCards] = useState<string[]>([]);
   const [playerCards, setPlayerCards] = useState<string[]>([]);
+  const [winner, setWinner] = useState<string>(""); // dealer, player, tie
   const [dealerScore, setDealerScore] = useState<number>(0);
   const [playerScore, setPlayerScore] = useState<number>(0);
 
-  const hit = (j: string[]) => {
+  useEffect(() => {
+  },[winner]);
+
+  function hit(j: string[]) : number {
     let randomIndex = Math.floor(Math.random() * Cards.length);
     let cardToAdd: string = Cards[randomIndex];
     let updatedCards = [...Cards];
@@ -70,48 +74,66 @@ export const Jeu = () => {
 
     if (j === dealerCards) {
       setDealerCards([...dealerCards, cardToAdd]);
-      updateDealerScore([cardToAdd]);
+      setCards(updatedCards);
+      return updateDealerScore([cardToAdd]);
     } else if (j === playerCards) {
       setPlayerCards([...playerCards, cardToAdd]);
-      updatePlayerScore([cardToAdd]);
+      setCards(updatedCards);
+      return updatePlayerScore([cardToAdd]);
     }
-
-    setCards(updatedCards);
+    else{
+      return 0;
+    }
   };
 
   const updatePlayerScore = (cards: string[]) => {
-    let tempPlayerScore: number = playerScore;
-    for (let i = 0; i < cards.length; i++) {
-      let cardValue = cards[i].slice(0, cards[i].indexOf("-"));
-      if (cardValue === "A") {
-        tempPlayerScore += 11;
-      } else if (cardValue === "J" || cardValue === "Q" || cardValue === "K") {
-        tempPlayerScore += 10;
-      } else {
-        tempPlayerScore += parseInt(cardValue);
-      }
+    let tempPlayerScore : number = playerScore;
+   for (let i = 0; i < cards.length; i++) {
+    let cardValue = cards[i].slice(0, cards[i].indexOf("-"));
+    if (cardValue === "A") {
+      tempPlayerScore += 11;
+    } else if (cardValue === "J" || cardValue === "Q" || cardValue === "K") {
+      tempPlayerScore += 10;
+    } else {
+      tempPlayerScore += parseInt(cardValue);
     }
-    setPlayerScore(tempPlayerScore);
+  };
+  if (tempPlayerScore > 21) {
+    setWinner("Dealer win ! Player bust");
+  }
+  if (tempPlayerScore === 21) {
+    setWinner("Player win ! Blackjack !");
+  }
+  setPlayerScore(tempPlayerScore);
+  return tempPlayerScore;
   };
 
   const updateDealerScore = (cards: string[]) => {
     let tempdealerScore: number = dealerScore;
     for (let i = 0; i < cards.length; i++) {
-      let cardValue = cards[i].slice(0, cards[i].indexOf("-"));
-      if (cardValue === "A") {
-        tempdealerScore += 11;
-      } else if (cardValue === "J" || cardValue === "Q" || cardValue === "K") {
-        tempdealerScore += 10;
-      } else {
-        tempdealerScore += parseInt(cardValue);
-      }
+    let cardValue = cards[i].slice(0, cards[i].indexOf("-"));
+    if (cardValue === "A") {
+      tempdealerScore += 11;
+    } else if (cardValue === "J" || cardValue === "Q" || cardValue === "K") {
+      tempdealerScore += 10;
+    } else {
+      tempdealerScore += parseInt(cardValue);
     }
-    setDealerScore(tempdealerScore);
+  };
+  if (tempdealerScore > 21) {
+    setWinner("Player win ! Dealer bust");
+  }
+  if (tempdealerScore === 21) {
+    setWinner("Dealer win !");
+  }
+  setDealerScore(tempdealerScore);
+  return tempdealerScore;
   };
 
   const deal = () => {
-    dealerCards: [] = [];
-    playerCards: [] = [];
+    setWinner("");
+    dealerCards : [] = [];
+    playerCards : [] = [];
     let updatedCards = [...Cards];
     for (let i = 0; i < 2; i++) {
       let randomIndex = Math.floor(Math.random() * Cards.length);
@@ -137,8 +159,22 @@ export const Jeu = () => {
   const [isStand, setIsStand] = useState(false);
 
   const stand = () => {
-    // Logique pour terminer le tour du joueur et laisser le croupier jouer
-    setIsStand(true)
+    let currentDealerScore : number = dealerScore;
+    while (currentDealerScore < 17) {
+      currentDealerScore = hit(dealerCards);
+    }
+    if (currentDealerScore > 21) {
+      setWinner("Player win ! Dealer bust");
+    }
+    else if (currentDealerScore > playerScore) {
+      setWinner("Dealer win !");
+    }
+    else if (currentDealerScore < playerScore) {
+      setWinner("Player win !");
+    }
+    else if (currentDealerScore === playerScore) {
+      setWinner("It's a tie !");
+    }
   };
 
   return (
@@ -173,19 +209,14 @@ export const Jeu = () => {
         </div>
       </div>
       {/* Afficher les cartes du joueur */}
-      <div className="border rounded pb-">
-        <h2 className="">Player's Hand {playerScore}</h2>
-        <div className="flex justify-center">
-          {playerCards.map((card, index) => (
-            <div className="p-8" key={index}>
-              <img
-                className="w-32 h-auto"
-                src={"/cards/" + card}
-                alt={`Card ${index}`}
-              />
-            </div>
-          ))}
-        </div>
+      <div>
+        <p>{winner}</p>
+        <h2 className='font-bold'>Player's Hand {playerScore}</h2>
+        {playerCards.map((card, index) => (
+          <div key={index}>
+            <img src={"/cards/" + card} alt={`Card ${index}`} />
+          </div>
+        ))}
       </div>
       {/* Afficher les cartes du croupier */}
       {/* Boutons d'action */}
