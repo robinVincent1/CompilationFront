@@ -91,7 +91,7 @@ export const Jeu = () => {
       <h1>Blackjack Game</h1>
       {/* Afficher les cartes du joueur */}
       <div>
-        <h2>Player's Hand {playerScore}</h2>
+        <h2 className='font-bold'>Player's Hand {playerScore}</h2>
         {playerCards.map((card, index) => (
           <div key={index}>
             <img src={"/cards/" + card} alt={`Card ${index}`} />
