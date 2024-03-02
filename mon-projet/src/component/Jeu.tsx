@@ -17,10 +17,10 @@ export const Jeu = () => {
 
     if (j === dealerCards) {
       setDealerCards([...dealerCards, cardToAdd]);
-      console.log(cardToAdd)
-      console.log(dealerCards)
+      updateDealerScore([cardToAdd]);
     } else if (j === playerCards) {
       setPlayerCards([...playerCards, cardToAdd]);
+      updatePlayerScore([cardToAdd]);
     }
 
     setCards(updatedCards);
