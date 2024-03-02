@@ -1,5 +1,5 @@
-import { randomInt } from 'crypto';
-import React, { useState,useEffect } from 'react';
+import { randomInt } from "crypto";
+import React, { useState, useEffect } from "react";
 
 export const Jeu = () => {
   const [Cards, setCards] = useState<string[]>([
@@ -62,10 +62,9 @@ export const Jeu = () => {
   const [dealerScore, setDealerScore] = useState<number>(0);
   const [playerScore, setPlayerScore] = useState<number>(0);
 
-  useEffect(() => {
-  },[winner]);
+  useEffect(() => {}, [winner]);
 
-  function hit(j: string[]) : number {
+  function hit(j: string[]): number {
     let randomIndex = Math.floor(Math.random() * Cards.length);
     let cardToAdd: string = Cards[randomIndex];
     let updatedCards = [...Cards];
@@ -80,60 +79,59 @@ export const Jeu = () => {
       setPlayerCards([...playerCards, cardToAdd]);
       setCards(updatedCards);
       return updatePlayerScore([cardToAdd]);
-    }
-    else{
+    } else {
       return 0;
     }
-  };
+  }
 
   const updatePlayerScore = (cards: string[]) => {
-    let tempPlayerScore : number = playerScore;
-   for (let i = 0; i < cards.length; i++) {
-    let cardValue = cards[i].slice(0, cards[i].indexOf("-"));
-    if (cardValue === "A") {
-      tempPlayerScore += 11;
-    } else if (cardValue === "J" || cardValue === "Q" || cardValue === "K") {
-      tempPlayerScore += 10;
-    } else {
-      tempPlayerScore += parseInt(cardValue);
+    let tempPlayerScore: number = playerScore;
+    for (let i = 0; i < cards.length; i++) {
+      let cardValue = cards[i].slice(0, cards[i].indexOf("-"));
+      if (cardValue === "A") {
+        tempPlayerScore += 11;
+      } else if (cardValue === "J" || cardValue === "Q" || cardValue === "K") {
+        tempPlayerScore += 10;
+      } else {
+        tempPlayerScore += parseInt(cardValue);
+      }
     }
-  };
-  if (tempPlayerScore > 21) {
-    setWinner("Dealer win ! Player bust");
-  }
-  if (tempPlayerScore === 21) {
-    setWinner("Player win ! Blackjack !");
-  }
-  setPlayerScore(tempPlayerScore);
-  return tempPlayerScore;
+    if (tempPlayerScore > 21) {
+      setWinner("Dealer win ! Player bust");
+    }
+    if (tempPlayerScore === 21) {
+      setWinner("Player win ! Blackjack !");
+    }
+    setPlayerScore(tempPlayerScore);
+    return tempPlayerScore;
   };
 
   const updateDealerScore = (cards: string[]) => {
     let tempdealerScore: number = dealerScore;
     for (let i = 0; i < cards.length; i++) {
-    let cardValue = cards[i].slice(0, cards[i].indexOf("-"));
-    if (cardValue === "A") {
-      tempdealerScore += 11;
-    } else if (cardValue === "J" || cardValue === "Q" || cardValue === "K") {
-      tempdealerScore += 10;
-    } else {
-      tempdealerScore += parseInt(cardValue);
+      let cardValue = cards[i].slice(0, cards[i].indexOf("-"));
+      if (cardValue === "A") {
+        tempdealerScore += 11;
+      } else if (cardValue === "J" || cardValue === "Q" || cardValue === "K") {
+        tempdealerScore += 10;
+      } else {
+        tempdealerScore += parseInt(cardValue);
+      }
     }
-  };
-  if (tempdealerScore > 21) {
-    setWinner("Player win ! Dealer bust");
-  }
-  if (tempdealerScore === 21) {
-    setWinner("Dealer win !");
-  }
-  setDealerScore(tempdealerScore);
-  return tempdealerScore;
+    if (tempdealerScore > 21) {
+      setWinner("Player win ! Dealer bust");
+    }
+    if (tempdealerScore === 21) {
+      setWinner("Dealer win !");
+    }
+    setDealerScore(tempdealerScore);
+    return tempdealerScore;
   };
 
   const deal = () => {
     setWinner("");
-    dealerCards : [] = [];
-    playerCards : [] = [];
+    dealerCards: [] = [];
+    playerCards: [] = [];
     let updatedCards = [...Cards];
     for (let i = 0; i < 2; i++) {
       let randomIndex = Math.floor(Math.random() * Cards.length);
@@ -154,36 +152,36 @@ export const Jeu = () => {
     updatePlayerScore(playerCards);
     setPlayerCards(playerCards);
     setCards(updatedCards);
+    setIsDeal(true);
   };
 
   const [isStand, setIsStand] = useState(false);
 
   const stand = () => {
-    let currentDealerScore : number = dealerScore;
+    let currentDealerScore: number = dealerScore;
     while (currentDealerScore < 17) {
       currentDealerScore = hit(dealerCards);
     }
     if (currentDealerScore > 21) {
       setWinner("Player win ! Dealer bust");
-    }
-    else if (currentDealerScore > playerScore) {
+    } else if (currentDealerScore > playerScore) {
       setWinner("Dealer win !");
-    }
-    else if (currentDealerScore < playerScore) {
+    } else if (currentDealerScore < playerScore) {
       setWinner("Player win !");
-    }
-    else if (currentDealerScore === playerScore) {
+    } else if (currentDealerScore === playerScore) {
       setWinner("It's a tie !");
     }
-    setIsStand(true)
+    setIsStand(true);
   };
+
+  const [isDeal, setIsDeal] = useState(false);
 
   return (
     <div>
       <h1 className="font-bold text-4xl p-8">Blackjack Game</h1>
-      <p className='font-bold text-[red] text-2xl p-8'>{winner}</p>
+      <p className="font-bold text-[red] text-2xl p-8">{winner}</p>
       <div>
-        <h2>Dealer's Hand {isStand && dealerScore}</h2>
+        {isDeal && <h2>Dealer's Hand {isStand && dealerScore}</h2>}
         <div className="flex justify-center">
           {dealerCards.map((card, index) => (
             <div className="p-8" key={index}>
@@ -211,32 +209,48 @@ export const Jeu = () => {
         </div>
       </div>
       {/* Afficher les cartes du joueur */}
-      <div >
-        <h2 className=''> Player's Hand {playerScore}</h2>
-        <div className='flex justify-center'>
-        {playerCards.map((card, index) => (
-          <div className='p-8' key={index}>
-            <img  className="w-32 h-auto" src={"/cards/" + card} alt={`Card ${index}`} />
-          </div>
-        ))}
+      <div>
+        {isDeal && <h2 className=""> Player's Hand {playerScore}</h2>}
+        <div className="flex justify-center">
+          {playerCards.map((card, index) => (
+            <div className="p-8" key={index}>
+              <img
+                className="w-32 h-auto"
+                src={"/cards/" + card}
+                alt={`Card ${index}`}
+              />
+            </div>
+          ))}
         </div>
       </div>
       {/* Afficher les cartes du croupier */}
       {/* Boutons d'action */}
-      <button
-        className="p-4 font-bold"
-        onClick={() => {
-          deal();
-        }}
-      >
-        Deal
-      </button>
-      <button className="p-4 font-bold" onClick={() => hit(playerCards)}>
-        Hit
-      </button>
-      {!isStand && (
+      {!isDeal && (
+        <button
+          className="p-4 font-bold"
+          onClick={() => {
+            deal();
+          }}
+        >
+          Nouvelle Partie
+        </button>
+      )}
+      {isDeal && !isStand && (
+        <button className="p-4 font-bold" onClick={() => hit(playerCards)}>
+          Hit
+        </button>
+      )}
+      {!isStand && isDeal && (
         <button className="font-bold" onClick={stand}>
           Stand
+        </button>
+      )}
+      {isStand && (
+        <button
+          className="p-4 font-bold"
+          onClick={() => window.location.reload()}
+        >
+          Nouvelle Partie
         </button>
       )}
     </div>
