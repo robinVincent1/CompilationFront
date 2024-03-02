@@ -175,12 +175,14 @@ export const Jeu = () => {
     else if (currentDealerScore === playerScore) {
       setWinner("It's a tie !");
     }
+    setIsStand(true)
   };
 
   return (
     <div>
       <h1 className="font-bold text-4xl p-8">Blackjack Game</h1>
-      <div className="border rounded">
+      <p className='font-bold text-[red] text-2xl p-8'>{winner}</p>
+      <div>
         <h2>Dealer's Hand {isStand && dealerScore}</h2>
         <div className="flex justify-center">
           {dealerCards.map((card, index) => (
@@ -209,14 +211,15 @@ export const Jeu = () => {
         </div>
       </div>
       {/* Afficher les cartes du joueur */}
-      <div>
-        <p>{winner}</p>
-        <h2 className='font-bold'>Player's Hand {playerScore}</h2>
+      <div >
+        <h2 className=''> Player's Hand {playerScore}</h2>
+        <div className='flex justify-center'>
         {playerCards.map((card, index) => (
-          <div key={index}>
-            <img src={"/cards/" + card} alt={`Card ${index}`} />
+          <div className='p-8' key={index}>
+            <img  className="w-32 h-auto" src={"/cards/" + card} alt={`Card ${index}`} />
           </div>
         ))}
+        </div>
       </div>
       {/* Afficher les cartes du croupier */}
       {/* Boutons d'action */}
