@@ -20,16 +20,12 @@ type Player = {
   hand: string[]; //Cartes que le joueur posséde
 }
 
-type CardDeck = {
-  id : number;
-  cards : string[]; //Cartes restantes dans le deck
-  nbCards : number; //Nombre de cartes restantes
-}
+
 
 export const Jeu = () => {
   const [dealer, setDealer] = useState<Dealer>({score:0, isWinner:false, hand:[]});
   const [player, setPlayer] = useState<Player>({id:0, pseudo:"", wallet:0, bet:0, isPlaying:0, score:0, isWinner:false,isStanding:false, hand:[]});
-  const [cardDeck, setCardDeck] = useState<CardDeck>({id:0, cards:[], nbCards:0});
+ 
   
 function hit(){
   webSocketService.sendMessage(`${player.id}:hit`);
