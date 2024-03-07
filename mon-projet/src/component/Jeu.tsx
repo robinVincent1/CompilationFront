@@ -31,7 +31,21 @@ export const Jeu = () => {
   const [player, setPlayer] = useState<Player>({id:0, pseudo:"", wallet:0, bet:0, isPlaying:0, score:0, isWinner:false,isStanding:false, hand:[]});
   const [cardDeck, setCardDeck] = useState<CardDeck>({id:0, cards:[], nbCards:0});
   
+function hit(){
+  webSocketService.sendMessage(`${player.id}:hit`);
+}
 
+function stand(){
+  webSocketService.sendMessage(`${player.id}:stand`);
+}
+
+function deal(){
+  webSocketService.sendMessage(`${player.id}:deal`);
+}
+
+function reload(){
+  webSocketService.sendMessage(`${player.id}:reload`);
+}
 
 
   return (
@@ -87,7 +101,7 @@ export const Jeu = () => {
       >
         Deal
       </button>
-      <button className="p-4 font-bold" onClick={() => hit(player.hand)}>
+      <button className="p-4 font-bold" onClick={() => hit()}>
         Hit
       </button>
       {!player.isStanding && (
@@ -95,7 +109,7 @@ export const Jeu = () => {
           Stand
         </button>
       )}
-      {isStand && (
+      {player.isStanding && (
         <button
           className="p-4 font-bold"
           onClick={() => window.location.reload()}
