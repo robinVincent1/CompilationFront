@@ -32,10 +32,7 @@ export const Jeu = () => {
       setDealer(data.dealer);
       setPlayer(data.player);
     }
-    webSocketService.connect("ws://localhost:8080", handleGameData);
-    return () => {
-      webSocketService.disconnect();
-    };
+    webSocketService.connect("ws://localhost:8080/game", handleGameData);
   }
   , []);
 
