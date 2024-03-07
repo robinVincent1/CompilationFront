@@ -53,15 +53,18 @@ export const Jeu = () => {
 
   function stand() {
     webSocketService.sendMessage(`${player.id}:stand`);
+    setEncours("fini");
   }
 
   function deal() {
     console.log("deal");
     webSocketService.sendMessage(`${player.id}:deal`);
+    setEncours("partie");
   }
 
   function reload() {
     webSocketService.sendMessage(`${player.id}:reload`);
+    setEncours("start");
   }
 
   function bet() {
@@ -71,7 +74,7 @@ export const Jeu = () => {
       setBetOk(true);
       setBetIsShow(false);
       setAmount(0);
-      setBetMade(true);
+      setEncours("betOk");
     } else {
       setBetOk(false);
     }
@@ -88,6 +91,7 @@ export const Jeu = () => {
 
   const [betOk, setBetOk] = useState(true);
   const [betMade, setBetMade] = useState(false);
+  const [enCours, setEncours] = useState("start");
 
   return (
     <div>
@@ -144,58 +148,62 @@ export const Jeu = () => {
       </div>
       {/* Afficher les cartes du croupier */}
       {/* Boutons d'action */}
-      <button
-        className="p-4 font-bold"
-        onClick={() => {
-          deal();
-        }}
-      >
-        Deal
-      </button>
-      {!betMade && betIsShow ? (
-        <div>
-          <input
-            type="number"
-            className="text-black"
-            placeholder={` Max ${player.wallet}`}
-            onChange={handleBet}
-          />
-          <button
-            className="p-4 font-bold"
-            onClick={() => {
-              bet();
-            }}
-          >
-            Miser
-          </button>
-          {!betOk && amount > 0 && (
-            <p className="text-[red]">Vous n'avez pas assez d'argent</p>
-          )}
-        </div>
-      ) : (
+      {enCours == "betOk" && (
         <button
           className="p-4 font-bold"
           onClick={() => {
-            setBetIsShow(true);
+            deal();
           }}
         >
-          Bet
+          Deal
         </button>
       )}
-
-      <button className="p-4 font-bold" onClick={() => hit()}>
-        Hit
-      </button>
-      {!player.isStanding && (
-        <button className="font-bold" onClick={stand}>
-          Stand
-        </button>
+      {enCours == "start" && (
+        <div>
+          {betIsShow ? (
+            <div>
+              <input
+                type="number"
+                className="text-black"
+                placeholder={` Max ${player.wallet}`}
+                onChange={handleBet}
+              />
+              <button
+                className="p-4 font-bold"
+                onClick={() => {
+                  bet();
+                }}
+              >
+                Miser
+              </button>
+              {!betOk && amount > 0 && (
+                <p className="text-[red]">Vous n'avez pas assez d'argent</p>
+              )}
+            </div>
+          ) : (
+            <button
+              className="p-4 font-bold"
+              onClick={() => {
+                setBetIsShow(true);
+              }}
+            >
+              Bet
+            </button>
+          )}
+        </div>
       )}
-      {player.isStanding && (
-        <button
-          className="p-4 font-bold"
-          onClick={() => window.location.reload()}
-        >
+      {enCours == "partie" && (
+        <div>
+          <button className="p-4 font-bold" onClick={() => hit()}>
+            Hit
+          </button>
+          <button className="font-bold" onClick={stand}>
+            Stand
+          </button>
+        </div>
+      )}
+      {enCours == "fini" && (
+        <button className="p-4 font-bold" onClick={reload}>
           Nouvelle Partie
         </button>
       )}
