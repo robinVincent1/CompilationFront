@@ -28,9 +28,9 @@ export const Jeu = () => {
  
   useEffect(() => {
     const handleGameData = (data: any) => {
-      console.log(data);
-      setDealer(data.dealer);
-      setPlayer(data.player);
+      console.log("player" , data.eventData.player);
+      setDealer(data.eventData.dealer);
+      setPlayer(data.eventData.player[0]);
     }
     webSocketService.connect("ws://localhost:8080/game", handleGameData);
   }
