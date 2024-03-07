@@ -31,11 +31,11 @@ export const Jeu = () => {
       console.log(data);
       setDealer(data.dealer);
       setPlayer(data.player);
+    }
     webSocketService.connect("ws://localhost:8080", handleGameData);
     return () => {
       webSocketService.disconnect();
     };
-  }
   }
   , []);
 
