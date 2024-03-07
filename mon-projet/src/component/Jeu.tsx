@@ -70,6 +70,8 @@ export const Jeu = () => {
       webSocketService.sendMessage(`${player.id}:bet:${amount}`);
       setBetOk(true);
       setBetIsShow(false);
+      setAmount(0);
+      setBetMade(true);
     } else {
       setBetOk(false);
     }
@@ -85,6 +87,7 @@ export const Jeu = () => {
   };
 
   const [betOk, setBetOk] = useState(true);
+  const [betMade, setBetMade] = useState(false);
 
   return (
     <div>
@@ -123,7 +126,10 @@ export const Jeu = () => {
       {/* Afficher les cartes du joueur */}
       <div>
         <h2 className=""> Player's Hand {player.score}</h2>
-        <p>Mise : {player.bet}</p>
+        <div className="flex">
+          <p className="p-2">Porte-Feuille : {player.wallet}</p>
+          <p className="p-2">Mise : {player.bet}</p>
+        </div>
         <div className="flex justify-center">
           {player.hand.map((card, index) => (
             <div className="p-8" key={index}>
@@ -146,7 +152,7 @@ export const Jeu = () => {
       >
         Deal
       </button>
-      {betIsShow ? (
+      {!betMade && betIsShow ? (
         <div>
           <input
             type="number"
@@ -176,6 +182,7 @@ export const Jeu = () => {
           Bet
         </button>
       )}
+
       <button className="p-4 font-bold" onClick={() => hit()}>
         Hit
       </button>
