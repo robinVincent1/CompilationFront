@@ -95,6 +95,14 @@ export const Jeu = () => {
           Stand
         </button>
       )}
+      {isStand && (
+        <button
+          className="p-4 font-bold"
+          onClick={() => window.location.reload()}
+        >
+          Nouvelle Partie
+        </button>
+      )}
     </div>
   );
 };
