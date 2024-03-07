@@ -30,11 +30,12 @@ export const Jeu = () => {
     const handleGameData = (data: any) => {
       console.log("player" , data.eventData.player);
       setDealer(data.eventData.dealer);
-      setPlayer(data.eventData.player[0]);
+      setPlayer(data.eventData.player);
     }
     webSocketService.connect("ws://localhost:8080/game", handleGameData);
   }
   , []);
+
 
   
 function hit(){
@@ -46,6 +47,7 @@ function stand(){
 }
 
 function deal(){
+  console.log("deal")
   webSocketService.sendMessage(`${player.id}:deal`);
 }
 
