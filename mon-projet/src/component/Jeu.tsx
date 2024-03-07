@@ -26,6 +26,19 @@ export const Jeu = () => {
   const [dealer, setDealer] = useState<Dealer>({score:0, isWinner:false, hand:[]});
   const [player, setPlayer] = useState<Player>({id:0, pseudo:"", wallet:0, bet:0, isPlaying:0, score:0, isWinner:false,isStanding:false, hand:[]});
  
+  useEffect(() => {
+    const handleGameData = (data: any) => {
+      console.log(data);
+      setDealer(data.dealer);
+      setPlayer(data.player);
+    webSocketService.connect("ws://localhost:8080", handleGameData);
+    return () => {
+      webSocketService.disconnect();
+    };
+  }
+  }
+  , []);
+
   
 function hit(){
   webSocketService.sendMessage(`${player.id}:hit`);
