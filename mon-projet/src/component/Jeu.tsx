@@ -154,7 +154,7 @@ export const Jeu = () => {
       </p>
       <div>
         {enCours != "start" && enCours != "betOk" && (
-        <h2>Dealer's Hand {player.isStanding && dealer.score}</h2>
+        <h2>Dealer {player.isStanding && dealer.score}</h2>
         )}
         <div className="flex justify-center">
           {dealer.hand.map((card, index) => (
@@ -185,7 +185,7 @@ export const Jeu = () => {
       {/* Afficher les cartes du joueur */}
       <div>
         {enCours != "start" && enCours != "betOk" && (
-        <h2 className=""> Player's Hand {player.score}</h2>
+        <h2 className=""> {player.pseudo}  {player.score}</h2>
         )}
 
         <div className="flex justify-center">
