@@ -47,7 +47,7 @@ export const Jeu = () => {
 
   useEffect(() => {
     const handleGameData = (data: any) => {
-      console.log("player", data.eventData.player);
+      console.log("dealer", data.eventData.dealer.hand[1], typeof(data.eventData.dealer.hand[1]));
       setDealer(data.eventData.dealer);
       setPlayer(data.eventData.player);
       if (data.eventData.player.gameStatus == "Busted"){
@@ -85,6 +85,10 @@ export const Jeu = () => {
   }
   function hit() {
     webSocketService.sendMessage(`${player.id}:hit`);
+  }
+  
+  function assurance() {
+    webSocketService.sendMessage(`${player.id}:assurance`);
   }
 
   function double() {
@@ -262,6 +266,12 @@ export const Jeu = () => {
           <button className="p-4 font-bold" onClick={() => double()}>
             Doubler
           </button>
+          )}
+          {(dealer.hand[1] == "A-D.png" ||dealer.hand[1] == "A-C.png" ||dealer.hand[1] == "A-H.png" ||dealer.hand[1] == "A-S.png"   && (
+            <button className="p-4 font-bold" onClick={() => assurance()}>
+              Assurance
+            </button>
+          )
           )}
           <button className="p-4 font-bold" onClick={() => hit()}>
             Hit
