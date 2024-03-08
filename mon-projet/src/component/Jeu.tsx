@@ -15,10 +15,12 @@ type Player = {
   bet: number; //Mise du joueur
   isPlaying: number; //Si le joueur est en train de jouer
   score: number;
+  altScore : number | null ; //Score alternatif pour l'as
   gameStatus: string;
   isStanding: boolean;
   hand: string[]; //Cartes que le joueur posséde
   clock : number;
+
 };
 
 export const Jeu = () => {
@@ -34,6 +36,7 @@ export const Jeu = () => {
     bet: 0,
     isPlaying: 0,
     score: 0,
+    altScore : null,
     gameStatus: "En cours",
     isStanding: false,
     hand: [],
@@ -184,8 +187,11 @@ export const Jeu = () => {
       </div>
       {/* Afficher les cartes du joueur */}
       <div>
-        {enCours != "start" && enCours != "betOk" && (
+        {enCours != "start" && enCours != "betOk" && !player.altScore &&  (
         <h2 className=""> {player.pseudo}  {player.score}</h2>
+        )}
+        {enCours != "start" && enCours != "betOk" && player.altScore && (
+        <h2 className=""> {player.pseudo}  {player.score}/{player.altScore}</h2>
         )}
 
         <div className="flex justify-center">
