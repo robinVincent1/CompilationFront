@@ -85,7 +85,11 @@ export const Jeu = () => {
   }
   function hit() {
     webSocketService.sendMessage(`${player.id}:hit`);
-    setMajhit(majhit + 1);
+  }
+
+  function double() {
+    webSocketService.sendMessage(`${player.id}:double`);
+    setEncours("fini");
   }
 
   function stand() {
@@ -254,6 +258,11 @@ export const Jeu = () => {
       )}
       {enCours == "partie" && (
         <div>
+          {(player.score == 9 || player.score == 10 || player.score == 11) && ( 
+          <button className="p-4 font-bold" onClick={() => double()}>
+            Doubler
+          </button>
+          )}
           <button className="p-4 font-bold" onClick={() => hit()}>
             Hit
           </button>
