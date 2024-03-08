@@ -1,31 +1,27 @@
-import { randomInt } from "crypto";
 import React, { useState, useEffect } from "react";
 import { webSocketService } from "./WebSocketService";
 
 type Dealer = {
-  score: number;
-  isWinner: boolean;
+  score: number; // Score du dealer
   hand: string[]; //Cartes que le dealer posséde
 };
 
 type Player = {
-  id: number;
-  pseudo: string;
-  wallet: number;
+  id: number; // Identifiant du joueur  (gnéré par le serveur)
+  pseudo: string; // Pseudo du joueur
+  wallet: number; // Argent du joueur
   bet: number; //Mise du joueur
-  isPlaying: number; //Si le joueur est en train de jouer
-  score: number;
+  score: number; //Score du joueur
   altScore: number | null; //Score alternatif pour l'as
-  gameStatus: string;
-  isStanding: boolean;
+  gameStatus: string; //Statut de la partie
+  isStanding: boolean; //Le joueur a t il stand ou non 
   hand: string[]; //Cartes que le joueur posséde
-  clock: number;
-};
+  clock: number; //Temps restant pour le joueur
+}; 
 
 export const Jeu = () => {
   const [dealer, setDealer] = useState<Dealer>({
     score: 0,
-    isWinner: false,
     hand: [],
   });
   const [player, setPlayer] = useState<Player>({
@@ -33,7 +29,6 @@ export const Jeu = () => {
     pseudo: "",
     wallet: 0,
     bet: 0,
-    isPlaying: 0,
     score: 0,
     altScore: null,
     gameStatus: "En cours",
@@ -41,116 +36,108 @@ export const Jeu = () => {
     hand: [],
     clock: 0,
   });
-  const [majhit, setMajhit] = useState(0);
+  const [betOk, setBetOk] = useState(true); // Vérification de la mise
+  const [enCours, setEncours] = useState("pseudo"); // Statut de la partie
+  const [pseudo, setPseudo] = useState(""); // Pseudo du joueur 
+  const [betIsShow, setBetIsShow] = useState(false); // Affichage de la mise 
+  const [amount, setAmount] = useState(0); // Mise du joueur
 
   useEffect(() => {
     const handleGameData = (data: any) => {
-      console.log(
-        "dealer",
-        data.eventData.dealer.hand[1],
-        typeof data.eventData.dealer.hand[1]
-      );
-      setDealer(data.eventData.dealer);
-      setPlayer(data.eventData.player);
-      if (data.eventData.player.gameStatus == "Busted") {
-        setEncours("fini");
+      setDealer(data.eventData.dealer); // Mise à jour des données du dealer
+      setPlayer(data.eventData.player); // Mise à jour des données du joueur 
+      if (data.eventData.player.gameStatus === "Busted") { // Si le joueur est busted
+        setEncours("fini"); // Fin de la partie
       }
     };
-    webSocketService.connect("ws://localhost:8080/game", handleGameData);
+    webSocketService.connect("ws://localhost:8080/game", handleGameData); // Connexion au serveur et réception des données
   }, []);
 
   function gameMessage() {
-    if (player.gameStatus == "Menu") {
+    if (player.gameStatus === "Menu") { // Si le joueur est dans le menu
       return "Faites vos jeux ! ";
     }
-    if (player.gameStatus == "BetDone") {
+    if (player.gameStatus === "BetDone") { // Si le joueur a fait sa mise 
       return "Rien ne va plus";
     }
-    if (player.gameStatus == "Blackjack") {
+    if (player.gameStatus === "Blackjack") { // Si le joueur a un blackjack
       return "Blackjack";
     }
-    if (player.gameStatus == "Busted") {
+    if (player.gameStatus === "Busted") { // Si le joueur est busted
       return "Busted";
     }
-    if (player.gameStatus == "Tie") {
+    if (player.gameStatus === "Tie") { // Si le joueur est à égalité
       return "Tie";
     }
-    if (player.gameStatus == "Winner") {
+    if (player.gameStatus === "Winner") { // Si le joueur a gagné
       return "Win";
     }
-    if (player.gameStatus == "Loser") {
+    if (player.gameStatus === "Loser") { // Si le joueur a perdu
       return "Lose";
     }
   }
-  function hit() {
-    webSocketService.sendMessage(`${player.id}:hit`);
+  function hit() { // Fonction pour demander une carte
+    webSocketService.sendMessage(`${player.id}:hit`); // Envoi d'un message au serveur pour demander une carte 
   }
 
-  function assurance() {
-    webSocketService.sendMessage(`${player.id}:assurance`);
+  function assurance() { // Fonction pour demander une assurance
+    webSocketService.sendMessage(`${player.id}:assurance`); // Envoi d'un message au serveur pour demander une assurance
   }
 
-  function double() {
-    webSocketService.sendMessage(`${player.id}:double`);
-    setEncours("fini");
+  function double() { // Fonction pour doubler la mise 
+    webSocketService.sendMessage(`${player.id}:double`); // Envoi d'un message au serveur pour doubler la mise 
+    setEncours("fini"); // Fin de la partie
   }
 
   function stand() {
-    webSocketService.sendMessage(`${player.id}:stand`);
-    setEncours("fini");
+    webSocketService.sendMessage(`${player.id}:stand`); // Envoi d'un message au serveur pour stand
+    setEncours("fini"); // Fin de la partie
   }
 
   function deal() {
-    console.log("deal");
-    webSocketService.sendMessage(`${player.id}:deal`);
-    setEncours("partie");
+    webSocketService.sendMessage(`${player.id}:deal`); // Envoi d'un message au serveur pour commencer une nouvelle partie
+    setEncours("partie"); // Début de la partie 
   }
 
   function reload() {
-    webSocketService.sendMessage(`${player.id}:reload`);
-    setEncours("start");
+    webSocketService.sendMessage(`${player.id}:reload`); // Envoi d'un message au serveur pour recharger la page
+    setEncours("start"); // Début de la partie
   }
 
-  function sendPseudo() {
-    webSocketService.sendMessage(`${player.id}:pseudo:${pseudo}`)
-    setEncours("start")
+  function sendPseudo() { // Fonction pour envoyer le pseudo
+    webSocketService.sendMessage(`${player.id}:pseudo:${pseudo}`) // Envoi d'un message au serveur pour envoyer le pseudo
+    setEncours("start") // Début de la partie
   }
 
-  function bet() {
-    if (amount > 0 && amount <= player.wallet) {
-      // Vérification de la valeur de la mise
-      webSocketService.sendMessage(`${player.id}:bet:${amount}`);
-      setBetOk(true);
-      setBetIsShow(false);
-      setAmount(0);
-      setEncours("betOk");
+  function bet() { // Fonction pour miser
+    if (amount > 0 && amount <= player.wallet) {// Vérification de la valeur de la mise
+      webSocketService.sendMessage(`${player.id}:bet:${amount}`); // Envoi d'un message au serveur pour miser
+      setBetOk(true); // La mise est ok
+      setBetIsShow(false); // La mise n'est plus affichée
+      setAmount(0); // La mise est remise à 0
+      setEncours("betOk"); // La mise à était faite la partie peut continuer 
     } else {
-      setBetOk(false);
+      setBetOk(false); // La mise n'est pas ok
     }
   }
 
-  const [betIsShow, setBetIsShow] = useState(false);
-  const [amount, setAmount] = useState(0);
-  const handleBet = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(event.target.value);
-    if (!isNaN(value)) {
-      setAmount(value);
+  const handleBet = (event: React.ChangeEvent<HTMLInputElement>) => { // Fonction pour gérer la mise
+    const value = parseFloat(event.target.value); // Récupération de la valeur de la mise 
+    if (!isNaN(value)) { // Si la valeur est un nombre
+      setAmount(value); // Mise à jour de la valeur de la mise
     }
   };
 
-  const [betOk, setBetOk] = useState(true);
-  const [betMade, setBetMade] = useState(false);
-  const [enCours, setEncours] = useState("pseudo");
 
-  const [pseudo, setPseudo] = useState("");
-  const handlePseudo = (event: React.ChangeEvent<HTMLInputElement>) => {
-      setPseudo(event.target.value)
+  const handlePseudo = (event: React.ChangeEvent<HTMLInputElement>) => { // Fonction pour gérer le pseudo
+      setPseudo(event.target.value) // Mise à jour du pseudo
   }
 
   return (
     <div>
       <div className="">
         <div className="absolute left-8 top-8">
+          {/* Afficher le portefeuille du joueur */}
           <div className="flex">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -168,6 +155,7 @@ export const Jeu = () => {
             </svg>
             {player.wallet}
           </div>
+          {/* Afficher la mise du joueur */}
           <div className="flex">
             <svg
               fill="white"
@@ -183,71 +171,76 @@ export const Jeu = () => {
         </div>
         <h1 className="font-bold text-4xl p-8">Blackjack Game</h1>
       </div>
-      {enCours != "start" && enCours != "betOk" && enCours != "fini" && enCours != "pseudo" && (
-        <p>{player.clock}</p>
+      {/* Afficher le temps restant pour le joueur */}
+      {enCours !== "start" && enCours !== "betOk" && enCours !== "fini" && enCours !== "pseudo" && (
+      <p>{player.clock}</p>
       )}
-      {enCours == "pseudo" && (
-        <div>
-          <div className="p-2">
-            <h2 className="p-2"> Choisi ton pseudo</h2>
-            <input className="rounded text-[#282c34]" onChange={handlePseudo}/>
-          </div>
-          <button className="pl-4 pr-4 font-bold border hover:bg-[white] hover:text-[#282c34]"
-          onClick={sendPseudo}
-          >
-            Envoyer
-          </button>
+      {/* Afficher le choix du pseudo du joueur */}
+      {enCours === "pseudo" && (
+      <div>
+        <div className="p-2">
+          <h2 className="p-2"> Choisi ton pseudo</h2>
+          <input className="rounded text-[#282c34]" onChange={handlePseudo}/>
         </div>
+        <button className="pl-4 pr-4 font-bold border hover:bg-[white] hover:text-[#282c34]"
+        onClick={sendPseudo}
+        >
+        Envoyer
+        </button>
+      </div>
       )}
-      {enCours != "pseudo" && 
-          <p className="font-bold text-[red] text-2xl p-8">{gameMessage()}</p>
+      {/* Afficher le message de la partie */}
+      {enCours !== "pseudo" && 
+      <p className="font-bold text-[red] text-2xl p-8">{gameMessage()}</p>
       }
       <div>
-        {enCours != "start" && enCours != "betOk" && enCours != "pseudo" &&(
-          <h2 className="font-bold">Dealer : {player.isStanding && dealer.score}</h2>
+        {/* Afficher les cartes du croupier */}
+        {enCours !== "start" && enCours !== "betOk" && enCours !== "pseudo" &&(
+        <h2 className="font-bold">Dealer : {player.isStanding && dealer.score}</h2>
         )}
         <div className="flex justify-center">
           {dealer.hand.map((card, index) => (
-            <div className="p-8" key={index}>
-              {player.isStanding ? (
-                <img
-                  className="w-32 h-auto"
-                  src={"/cards/" + card}
-                  alt={`Card ${index}`}
-                />
+          <div className="p-8" key={index}>
+            {player.isStanding ? (
+              <img
+                className="w-32 h-auto"
+                src={"/cards/" + card}
+                alt={`Card ${index}`}
+              />
               ) : index === 0 ? (
-                <img
-                  className="w-32 h-auto"
-                  src={"/cards/BACK.png"}
-                  alt={`Card ${index}`}
-                />
+              <img
+                className="w-32 h-auto"
+                src={"/cards/BACK.png"}
+                alt={`Card ${index}`}
+              />
               ) : (
-                <img
-                  className="w-32 h-auto"
-                  src={"/cards/" + card}
-                  alt={`Card ${index}`}
-                />
-              )}
-            </div>
+              <img
+                className="w-32 h-auto"
+                src={"/cards/" + card}
+                alt={`Card ${index}`}
+              />
+            )}
+          </div>
           ))}
         </div>
       </div>
-      {/* Afficher les cartes du joueur */}
       <div>
-        {enCours != "start" && enCours != "betOk" && !player.altScore && enCours != "pseudo" &&(
-          <h2 className=" font-bold">
-            {" "}
-            {player.pseudo} : {player.score}
-          </h2>
+        {/* Si le joueur n'a pas tiré d'as ou n'a pas de score alternatif */}
+        {enCours !== "start" && enCours !== "betOk" && !player.altScore && enCours !== "pseudo" &&(
+        <h2 className=" font-bold">
+          {" "}
+          {player.pseudo} : {player.score}
+        </h2>
         )}
-        {enCours != "start" && enCours != "betOk" && player.altScore && enCours != "pseudo" &&(
-          <h2 className="">
-            {" "}
-            {player.pseudo} {player.score}/{player.altScore}
-          </h2>
+        {/* Si le joueur a tiré d'as et a un score alternatif */}
+        {enCours !== "start" && enCours !== "betOk" && player.altScore && enCours !== "pseudo" &&(
+        <h2 className="">
+          {" "}
+          {player.pseudo} {player.score}/{player.altScore}
+        </h2>
         )}
-
         <div className="flex justify-center">
+          {/* Afficher les cartes du joueur */}
           {player.hand.map((card, index) => (
             <div className="p-8" key={index}>
               <img
@@ -259,9 +252,8 @@ export const Jeu = () => {
           ))}
         </div>
       </div>
-      {/* Afficher les cartes du croupier */}
-      {/* Boutons d'action */}
-      {enCours == "betOk" && (
+      {/* Afficher le bouton pour commencer la partie (Distribution des premieres cartes) */}
+      {enCours === "betOk" && (
         <button
           className="p-2 pl-4 pr-4 font-bold border hover:bg-[white] hover:text-[#282c34]"
           onClick={() => {
@@ -271,7 +263,8 @@ export const Jeu = () => {
           Deal
         </button>
       )}
-      {enCours == "start" && (
+      {/* Afficher le bouton pour miser */}
+      {enCours === "start" && (
         <div>
           {betIsShow ? (
             <div>
@@ -289,6 +282,7 @@ export const Jeu = () => {
               >
                 Miser
               </button>
+              {/* Vérification de la mise */}
               {!betOk && amount > 0 && (
                 <p className="text-[red]">Vous n'avez pas assez d'argent</p>
               )}
@@ -305,9 +299,10 @@ export const Jeu = () => {
           )}
         </div>
       )}
-      {enCours == "partie" && (
+      {/* Afficher les boutons pour demander une carte, doubler, assurer, stand */}
+      {enCours === "partie" && (
         <div>
-          {(player.score == 9 || player.score == 10 || player.score == 11) && (
+          {(player.score === 9 || player.score === 10 || player.score === 11) && (
             <button
               className="p-2 pl-4 pr-4 font-bold border hover:bg-[white] hover:text-[#282c34]"
               onClick={() => double()}
@@ -315,10 +310,10 @@ export const Jeu = () => {
               Doubler
             </button>
           )}
-          {dealer.hand[1] == "A-D.png" ||
-            dealer.hand[1] == "A-C.png" ||
-            dealer.hand[1] == "A-H.png" ||
-            (dealer.hand[1] == "A-S.png" && (
+          { dealer.hand[1] === "A-D.png" ||
+            dealer.hand[1] === "A-C.png" ||
+            dealer.hand[1] === "A-H.png" ||
+            (dealer.hand[1] === "A-S.png" && (
               <button className="p-4 font-bold" onClick={() => assurance()}>
                 Assurance
               </button>
@@ -337,7 +332,8 @@ export const Jeu = () => {
           </button>
         </div>
       )}
-      {enCours == "fini" && (
+      {/* Afficher le bouton pour recommencer une partie */}
+      {enCours === "fini" && (
         <button className="p-4 font-bold" onClick={reload}>
           Nouvelle Partie
         </button>
