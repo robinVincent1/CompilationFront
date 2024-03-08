@@ -15,9 +15,10 @@ type Player = {
   bet: number; //Mise du joueur
   isPlaying: number; //Si le joueur est en train de jouer
   score: number;
-  isWinner: boolean;
+  gameStatus: string;
   isStanding: boolean;
   hand: string[]; //Cartes que le joueur posséde
+  clock : number;
 };
 
 export const Jeu = () => {
@@ -33,22 +34,55 @@ export const Jeu = () => {
     bet: 0,
     isPlaying: 0,
     score: 0,
-    isWinner: false,
+    gameStatus: "En cours",
     isStanding: false,
     hand: [],
+    clock : 0,
   });
+  const [majhit, setMajhit] = useState(0);
+ 
 
   useEffect(() => {
     const handleGameData = (data: any) => {
       console.log("player", data.eventData.player);
       setDealer(data.eventData.dealer);
       setPlayer(data.eventData.player);
+      if (data.eventData.player.gameStatus == "Busted"){
+        setEncours("fini");
+      }
     };
     webSocketService.connect("ws://localhost:8080/game", handleGameData);
   }, []);
 
+
+
+  function gameMessage() {
+    if (player.gameStatus == "Menu"){
+      return "Faites vos jeux ! ";
+    }
+    if (player.gameStatus == "BetDone"){
+      return "Rien ne va plus";
+    }
+    if (player.gameStatus == "Blackjack"){
+      return "Blackjack";
+    }
+    if (player.gameStatus == "Busted"){
+      return "Busted";
+    }
+    if (player.gameStatus == "Tie"){
+      return "Tie";
+    }
+    if (player.gameStatus == "Winner"){
+      return "Win";
+    }
+    if (player.gameStatus == "Loser"){
+      return "Lose";
+    }
+
+  }
   function hit() {
     webSocketService.sendMessage(`${player.id}:hit`);
+    setMajhit(majhit + 1);
   }
 
   function stand() {
@@ -96,11 +130,14 @@ export const Jeu = () => {
   return (
     <div>
       <h1 className="font-bold text-4xl p-8">Blackjack Game</h1>
+      <p>{player.clock}</p>
       <p className="font-bold text-[red] text-2xl p-8">
-        {"A changer (winner) "}
+        {gameMessage()}
       </p>
       <div>
+        {enCours != "start" && enCours != "betOk" && (
         <h2>Dealer's Hand {player.isStanding && dealer.score}</h2>
+        )}
         <div className="flex justify-center">
           {dealer.hand.map((card, index) => (
             <div className="p-8" key={index}>
@@ -129,7 +166,9 @@ export const Jeu = () => {
       </div>
       {/* Afficher les cartes du joueur */}
       <div>
+        {enCours != "start" && enCours != "betOk" && (
         <h2 className=""> Player's Hand {player.score}</h2>
+        )}
         <div className="flex">
           <p className="p-2">Porte-Feuille : {player.wallet}</p>
           <p className="p-2">Mise : {player.bet}</p>
